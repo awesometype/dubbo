@@ -30,6 +30,7 @@ import java.util.concurrent.ThreadLocalRandom;
  * If the weights are different then it will use random.nextInt(w1 + w2 + ... + wn)
  * Note that if the performance of the machine is better than others, you can set a larger weight.
  * If the performance is not so good, you can set a smaller weight.
+ * 随机算法
  */
 public class RandomLoadBalance extends AbstractLoadBalance {
 
