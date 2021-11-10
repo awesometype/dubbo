@@ -21,6 +21,7 @@ import org.apache.dubbo.config.annotation.DubboReference;
 import org.apache.dubbo.config.annotation.Reference;
 import org.apache.dubbo.config.spring.ReferenceBean;
 import org.apache.dubbo.rpc.model.ApplicationModel;
+
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -29,6 +30,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.annotation.AnnotationAttributes;
 import org.springframework.core.annotation.AnnotationUtils;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
@@ -50,6 +52,7 @@ import static org.springframework.util.ReflectionUtils.findField;
  */
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = ReferenceBeanBuilderTest.class)
+@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 public class ReferenceBeanBuilderTest {
 
     @DubboReference(
@@ -67,11 +70,12 @@ public class ReferenceBeanBuilderTest {
             timeout = 3, cache = "cache", filter = {"echo", "generic", "accesslog"},
             listener = {"deprecated"}, parameters = {"n1=v1  ", "n2 = v2 ", "  n3 =   v3  "},
             application = "application",
-            module = "module", consumer = "consumer", monitor = "monitor", registry = {"registry"},
+            module = "module", consumer = "consumer", monitor = "monitor", registry = {},
             // @since 2.7.3
             id = "reference",
             // @since 2.7.8
-            services = {"service1", "service2", "service3", "service2", "service1"}
+            services = {"service1", "service2", "service3", "service2", "service1"},
+            providedBy = {"service1", "service2", "service3"}
     )
     private static final Object TEST_FIELD = new Object();
 
@@ -125,6 +129,7 @@ public class ReferenceBeanBuilderTest {
         Assertions.assertEquals("deprecated", referenceBean.getListener());
         Assertions.assertEquals("reference", referenceBean.getId());
         Assertions.assertEquals(ofSet("service1", "service2", "service3"), referenceBean.getSubscribedServices());
+        Assertions.assertEquals("service1,service2,service3", referenceBean.getProvidedBy());
 
         // parameters
         Map<String, String> parameters = new HashMap<String, String>();
